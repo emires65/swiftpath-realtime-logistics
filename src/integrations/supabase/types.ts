@@ -14,7 +14,137 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      shipment_events: {
+        Row: {
+          created_at: string
+          id: string
+          lat: number | null
+          lng: number | null
+          location: string | null
+          note: string | null
+          occurred_at: string
+          shipment_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          location?: string | null
+          note?: string | null
+          occurred_at?: string
+          shipment_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          location?: string | null
+          note?: string | null
+          occurred_at?: string
+          shipment_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_events_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipments: {
+        Row: {
+          created_at: string
+          currency: string
+          current_status: string
+          days_of_package: number | null
+          destination: string
+          eta: string | null
+          id: string
+          is_customs_held: boolean
+          last_scan_at: string | null
+          lat: number | null
+          lng: number | null
+          origin: string
+          package_description: string
+          package_value: number
+          receiver_address: string
+          receiver_country: string
+          receiver_email: string | null
+          receiver_name: string
+          sender_address: string
+          sender_country: string
+          sender_email: string | null
+          sender_name: string
+          shipping_fee: number | null
+          tracking_id: string
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          current_status?: string
+          days_of_package?: number | null
+          destination: string
+          eta?: string | null
+          id?: string
+          is_customs_held?: boolean
+          last_scan_at?: string | null
+          lat?: number | null
+          lng?: number | null
+          origin: string
+          package_description: string
+          package_value: number
+          receiver_address: string
+          receiver_country: string
+          receiver_email?: string | null
+          receiver_name: string
+          sender_address: string
+          sender_country: string
+          sender_email?: string | null
+          sender_name: string
+          shipping_fee?: number | null
+          tracking_id: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          current_status?: string
+          days_of_package?: number | null
+          destination?: string
+          eta?: string | null
+          id?: string
+          is_customs_held?: boolean
+          last_scan_at?: string | null
+          lat?: number | null
+          lng?: number | null
+          origin?: string
+          package_description?: string
+          package_value?: number
+          receiver_address?: string
+          receiver_country?: string
+          receiver_email?: string | null
+          receiver_name?: string
+          sender_address?: string
+          sender_country?: string
+          sender_email?: string | null
+          sender_name?: string
+          shipping_fee?: number | null
+          tracking_id?: string
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
