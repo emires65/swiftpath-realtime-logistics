@@ -38,9 +38,6 @@ const Header = () => {
             <a href="#services" className="text-foreground hover:text-primary transition-colors">Services</a>
             <a href="#tracking" className="text-foreground hover:text-primary transition-colors">Track</a>
             <a href="#about" className="text-foreground hover:text-primary transition-colors">About</a>
-            <Button variant="outline" onClick={() => navigate('/admin')}>
-              Admin Portal
-            </Button>
           </nav>
 
           {/* Desktop Tracking */}
@@ -91,9 +88,6 @@ const Header = () => {
                 <a href="#services" className="text-foreground hover:text-primary py-2">Services</a>
                 <a href="#tracking" className="text-foreground hover:text-primary py-2">Track Shipment</a>
                 <a href="#about" className="text-foreground hover:text-primary py-2">About Us</a>
-                <Button variant="outline" onClick={() => navigate('/admin')} className="justify-start">
-                  Admin Portal
-                </Button>
               </nav>
             </div>
           </div>

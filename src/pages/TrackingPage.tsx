@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Copy, MapPin, Package, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Copy, MapPin, Package, Clock, AlertTriangle, CheckCircle, Truck, Navigation, Send, ShoppingCart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -155,10 +155,80 @@ const TrackingPage = () => {
   };
 
   const getStatusIcon = (status: string) => {
-    const lowerStatus = status.toLowerCase();
-    if (lowerStatus.includes('delivered')) return <CheckCircle className="w-4 h-4" />;
-    if (lowerStatus.includes('customs')) return <AlertTriangle className="w-4 h-4" />;
-    return <Package className="w-4 h-4" />;
+    switch (status.toLowerCase()) {
+      case 'delivered':
+        return <CheckCircle className="w-5 h-5" />;
+      case 'in transit':
+        return <Truck className="w-5 h-5" />;
+      case 'customs hold':
+        return <AlertTriangle className="w-5 h-5" />;
+      case 'processing':
+        return <Package className="w-5 h-5" />;
+      case 'created':
+        return <ShoppingCart className="w-5 h-5" />;
+      case 'dispatched':
+        return <Send className="w-5 h-5" />;
+      default:
+        return <Package className="w-5 h-5" />;
+    }
+  };
+
+  // Status steps for the progress bar
+  const statusSteps = [
+    { status: 'created', label: 'Order Placed', icon: ShoppingCart },
+    { status: 'dispatched', label: 'Dispatched', icon: Send },
+    { status: 'in transit', label: 'In Transit', icon: Truck },
+    { status: 'processing', label: 'At Sorting Center', icon: Package },
+    { status: 'out for delivery', label: 'Out for Delivery', icon: Navigation },
+    { status: 'delivered', label: 'Delivered', icon: CheckCircle }
+  ];
+
+  const getStepStatus = (stepStatus: string) => {
+    if (!shipment) return 'pending';
+    
+    const currentStatusIndex = statusSteps.findIndex(step => 
+      step.status.toLowerCase() === shipment.current_status.toLowerCase()
+    );
+    const stepIndex = statusSteps.findIndex(step => 
+      step.status.toLowerCase() === stepStatus.toLowerCase()
+    );
+    
+    if (stepIndex < currentStatusIndex) return 'completed';
+    if (stepIndex === currentStatusIndex) return 'current';
+    return 'pending';
+  };
+
+  const getProgressPercentage = () => {
+    if (!shipment) return 0;
+    
+    const currentStatusIndex = statusSteps.findIndex(step => 
+      step.status.toLowerCase() === shipment.current_status.toLowerCase()
+    );
+    
+    if (currentStatusIndex === -1) return 0;
+    
+    return ((currentStatusIndex + 1) / statusSteps.length) * 100;
+  };
+
+  const getStatusDescription = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'created':
+        return 'Your package has been received and is being prepared';
+      case 'dispatched':
+        return 'Package has left the origin facility';
+      case 'in transit':
+        return 'Package is on its way to the destination';
+      case 'processing':
+        return 'Package is being processed at sorting facility';
+      case 'out for delivery':
+        return 'Package is out for delivery to your address';
+      case 'delivered':
+        return 'Package has been successfully delivered';
+      case 'customs hold':
+        return 'Package is being held by customs for inspection';
+      default:
+        return 'Status information will be updated soon';
+    }
   };
 
   if (isLoading) {
@@ -206,49 +276,128 @@ const TrackingPage = () => {
         </div>
 
         <div className="max-w-4xl mx-auto space-y-6">
-          {/* Shipment Summary Card */}
+          {/* Status Progress Bar */}
           <Card className="shadow-xl">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-2xl font-bold">Shipment Details</CardTitle>
-                <div className="flex items-center space-x-2">
-                  <Badge className={`${getStatusColor(shipment.current_status)} text-white px-4 py-2`}>
-                    {getStatusIcon(shipment.current_status)}
-                    <span className="ml-2">{shipment.current_status}</span>
-                  </Badge>
-                </div>
+            <CardContent className="p-8">
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold mb-2 text-primary">Live Tracking - {trackingId}</h3>
+                <p className="text-muted-foreground">
+                  Estimated Delivery: {shipment?.eta ? new Date(shipment.eta).toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  }) : 'Calculating...'}
+                </p>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold mb-2 text-muted-foreground">Tracking ID</h3>
-                  <p className="text-2xl font-mono font-bold">{shipment.tracking_id}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2 text-muted-foreground">Service</h3>
-                  <p className="text-lg">Express International</p>
-                </div>
+              
+              {/* Progress Timeline */}
+              <div className="flex justify-between items-center mb-8 relative">
+                <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-muted -translate-y-1/2"></div>
+                <div 
+                  className="absolute top-1/2 left-0 h-0.5 bg-primary -translate-y-1/2 transition-all duration-500"
+                  style={{ width: `${getProgressPercentage()}%` }}
+                ></div>
+                
+                {statusSteps.map((step, index) => (
+                  <div key={step.status} className="flex flex-col items-center relative z-10">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
+                      getStepStatus(step.status) === 'completed' 
+                        ? 'bg-primary border-primary text-primary-foreground' 
+                        : getStepStatus(step.status) === 'current'
+                        ? 'bg-primary/20 border-primary text-primary'
+                        : 'bg-background border-muted-foreground/30 text-muted-foreground'
+                    }`}>
+                      <step.icon className="w-5 h-5" />
+                    </div>
+                    <div className="mt-2 text-center">
+                      <p className={`text-sm font-medium ${
+                        getStepStatus(step.status) === 'completed' || getStepStatus(step.status) === 'current'
+                          ? 'text-primary'
+                          : 'text-muted-foreground'
+                      }`}>
+                        {step.label}
+                      </p>
+                      {getStepStatus(step.status) === 'current' && (
+                        <p className="text-xs text-primary mt-1">Current Status</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold mb-2 text-muted-foreground">From</h3>
-                  <p className="font-medium">{shipment.sender_name}</p>
-                  <p className="text-sm text-muted-foreground">{shipment.origin}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2 text-muted-foreground">To</h3>
-                  <p className="font-medium">{shipment.receiver_name}</p>
-                  <p className="text-sm text-muted-foreground">{shipment.destination}</p>
-                </div>
-              </div>
+              {/* Current Status Details */}
+              {shipment && (
+                <Card className="bg-primary/5 border-primary/20">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                        {getStatusIcon(shipment.current_status)}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-lg font-semibold text-primary mb-1">{shipment.current_status}</h4>
+                        <p className="text-muted-foreground mb-2">
+                          {getStatusDescription(shipment.current_status)}
+                        </p>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-4 h-4" />
+                            {shipment.origin}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            Updated: {new Date().toLocaleTimeString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </CardContent>
+          </Card>
 
-              {shipment.eta && (
+          {/* Shipment Information */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="shadow-xl">
+              <CardHeader>
+                <CardTitle>Shipment Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div>
-                  <h3 className="font-semibold mb-2 text-muted-foreground">Estimated Delivery</h3>
-                  <p className="text-lg font-medium">
-                    {new Date(shipment.eta).toLocaleDateString('en-US', {
+                  <span className="text-muted-foreground text-sm">Tracking Number:</span>
+                  <p className="font-mono font-bold text-lg">{shipment.tracking_id}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-muted-foreground text-sm">Weight</span>
+                    <p className="font-medium">3 kg</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground text-sm">Service Type</span>
+                    <p className="font-medium">📦 Express</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-muted-foreground text-sm">Shipping Fee</span>
+                    <p className="font-medium">{shipment.currency} {shipment.package_value}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground text-sm">Delivery Time</span>
+                    <p className="font-medium">3-5 days</p>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-muted-foreground text-sm">Customs Status:</span>
+                  <p className="font-medium">
+                    {shipment.is_customs_held ? '⚠️ Hold' : '✅ Cleared'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground text-sm">Created:</span>
+                  <p className="font-medium">
+                    {new Date(shipment.created_at).toLocaleDateString('en-US', {
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',
@@ -256,98 +405,78 @@ const TrackingPage = () => {
                     })}
                   </p>
                 </div>
-              )}
+              </CardContent>
+            </Card>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+            <Card className="shadow-xl">
+              <CardHeader>
+                <CardTitle>Address Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
                 <div>
-                  <span className="text-muted-foreground">Package:</span>
-                  <p className="font-medium">{shipment.package_description}</p>
+                  <h4 className="font-semibold mb-2">Sender</h4>
+                  <p className="font-medium">{shipment.sender_name}</p>
+                  <p className="text-sm text-muted-foreground">{shipment.sender_address}</p>
+                  <p className="text-sm text-muted-foreground">🌍 {shipment.sender_country}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Value:</span>
-                  <p className="font-medium">{shipment.currency} {shipment.package_value}</p>
+                  <h4 className="font-semibold mb-2">Receiver</h4>
+                  <p className="font-medium">{shipment.receiver_name}</p>
+                  <p className="text-sm text-muted-foreground">{shipment.receiver_address}</p>
+                  <p className="text-sm text-muted-foreground">🌍 {shipment.receiver_country}</p>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Last Update:</span>
-                  <p className="font-medium">
-                    {shipment.last_scan_at 
-                      ? new Date(shipment.last_scan_at).toLocaleString()
-                      : 'N/A'
-                    }
-                  </p>
+                  <h4 className="font-semibold mb-2">Package Description</h4>
+                  <p className="text-sm">{shipment.package_description}</p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Customs Held Alert */}
           {shipment.is_customs_held && (
-            <Card className="border-destructive bg-destructive/5">
+            <Card className="border-destructive bg-destructive/5 shadow-xl">
               <CardContent className="p-6">
-                <div className="customs-alert">
-                  <div className="flex items-center mb-2">
-                    <AlertTriangle className="w-5 h-5 mr-2" />
-                    <span className="font-bold">Customs Hold Notice</span>
-                  </div>
-                  <p>Your goods have been held by customs. Please message customer service for assistance. Thank you.</p>
+                <div className="flex items-center mb-2">
+                  <AlertTriangle className="w-5 h-5 mr-2 text-destructive" />
+                  <span className="font-bold text-destructive">Customs Hold Notice</span>
                 </div>
+                <p>Your goods have been held by customs. Please message customer service for assistance. Thank you.</p>
               </CardContent>
             </Card>
           )}
 
-          {/* Live Map Placeholder */}
-          <Card className="shadow-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <MapPin className="mr-2 w-5 h-5" />
-                Live Tracking Map
-                <Badge variant="secondary" className="ml-2 bg-success/10 text-success">Live</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg flex items-center justify-center border-2 border-dashed border-primary/20">
-                <div className="text-center">
-                  <MapPin className="w-12 h-12 text-primary mx-auto mb-2" />
-                  <p className="text-muted-foreground">Interactive map coming soon</p>
-                  {shipment.lat && shipment.lng && (
-                    <p className="text-sm font-mono">
-                      Current: {shipment.lat.toFixed(4)}, {shipment.lng.toFixed(4)}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Timeline */}
+          {/* Tracking History */}
           <Card className="shadow-xl">
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Clock className="mr-2 w-5 h-5" />
-                Shipment Timeline
+                Tracking History
               </CardTitle>
             </CardHeader>
             <CardContent>
               {events.length > 0 ? (
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {events.map((event, index) => (
-                    <div key={event.id} className="flex items-start space-x-4">
-                      <div className={`w-4 h-4 rounded-full mt-1 flex-shrink-0 ${
-                        index === 0 ? 'bg-success animate-pulse' : 'bg-muted'
+                    <div key={event.id} className="flex items-start space-x-4 pb-4 border-b border-border/50 last:border-0">
+                      <div className={`w-3 h-3 rounded-full mt-2 flex-shrink-0 ${
+                        index === 0 ? 'bg-primary' : 'bg-muted'
                       }`} />
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="font-semibold">{event.status}</p>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="font-semibold text-primary">{event.status}</p>
+                            {event.location && (
+                              <p className="text-sm text-muted-foreground">{event.location}</p>
+                            )}
+                            {event.note && (
+                              <p className="text-sm mt-1">{event.note}</p>
+                            )}
+                          </div>
                           <p className="text-sm text-muted-foreground">
-                            {new Date(event.occurred_at).toLocaleString()}
+                            {new Date(event.occurred_at).toLocaleDateString()} {new Date(event.occurred_at).toLocaleTimeString()}
                           </p>
                         </div>
-                        {event.location && (
-                          <p className="text-sm text-muted-foreground">{event.location}</p>
-                        )}
-                        {event.note && (
-                          <p className="text-sm">{event.note}</p>
-                        )}
                       </div>
                     </div>
                   ))}
