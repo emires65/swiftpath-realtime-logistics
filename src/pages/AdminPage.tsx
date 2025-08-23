@@ -8,17 +8,17 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Package, Plus, Search, Copy, Eye, Edit, MapPin, AlertTriangle, LogOut } from 'lucide-react';
+import { Package, Plus, Search, Copy, Eye, Edit, MapPin, AlertTriangle, LogOut, Upload, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
 const AdminPage = () => {
   const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
   const [shipments, setShipments] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [mediaPreview, setMediaPreview] = useState<string | null>(null);
 
   // Form states
   const [newShipment, setNewShipment] = useState({
@@ -43,31 +43,18 @@ const AdminPage = () => {
   const currencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'INR'];
 
   useEffect(() => {
-    // Check if already authenticated
+    // Check if already authenticated, redirect to login if not
     const auth = sessionStorage.getItem('admin_authenticated');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-      fetchShipments();
+    if (auth !== 'true') {
+      navigate('/admin-login');
+      return;
     }
-  }, []);
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simple password check (in real app, this would be server-side)
-    if (password === '65657667') {
-      sessionStorage.setItem('admin_authenticated', 'true');
-      setIsAuthenticated(true);
-      fetchShipments();
-      toast.success('Successfully logged in');
-    } else {
-      toast.error('Invalid password');
-    }
-  };
+    fetchShipments();
+  }, [navigate]);
 
   const handleLogout = () => {
     sessionStorage.removeItem('admin_authenticated');
-    setIsAuthenticated(false);
-    setPassword('');
+    navigate('/admin-login');
   };
 
   const fetchShipments = async () => {
@@ -91,12 +78,81 @@ const AdminPage = () => {
     return `SPD${timestamp}${random}`;
   };
 
+  const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type and size
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (file.size > maxSize) {
+      toast.error('File size must be less than 50MB');
+      return;
+    }
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/webm', 'video/ogg'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Only images (JPEG, PNG, GIF) and videos (MP4, WebM, OGG) are allowed');
+      return;
+    }
+
+    setMediaFile(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setMediaPreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeMedia = () => {
+    setMediaFile(null);
+    setMediaPreview(null);
+  };
+
+  const uploadMediaFile = async (file: File, trackingId: string): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${trackingId}-${Date.now()}.${fileExt}`;
+      
+      const { data, error } = await supabase.storage
+        .from('shipment-media')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('shipment-media')
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading media:', error);
+      return null;
+    }
+  };
+
   const createShipment = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
       const trackingId = generateTrackingId();
+      
+      let mediaUrl = null;
+      let mediaType = null;
+      
+      // Upload media file if provided
+      if (mediaFile) {
+        mediaUrl = await uploadMediaFile(mediaFile, trackingId);
+        mediaType = mediaFile.type.startsWith('image/') ? 'image' : 'video';
+        
+        if (!mediaUrl) {
+          toast.error('Failed to upload media file');
+          setIsLoading(false);
+          return;
+        }
+      }
       
       const shipmentData = {
         tracking_id: trackingId,
@@ -105,6 +161,8 @@ const AdminPage = () => {
         shipping_fee: newShipment.shipping_fee ? parseFloat(newShipment.shipping_fee) : null,
         package_value: parseFloat(newShipment.package_value),
         days_of_package: newShipment.days_of_package ? parseInt(newShipment.days_of_package) : null,
+        media_url: mediaUrl,
+        media_type: mediaType,
       };
 
       const { data, error } = await supabase
@@ -154,6 +212,10 @@ const AdminPage = () => {
         currency: 'USD',
         days_of_package: ''
       });
+      
+      // Reset media
+      setMediaFile(null);
+      setMediaPreview(null);
 
       fetchShipments();
 
@@ -227,38 +289,6 @@ const AdminPage = () => {
     }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center">
-        <Card className="w-full max-w-md mx-auto">
-          <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-primary to-accent rounded-full flex items-center justify-center mx-auto mb-4">
-              <Package className="w-8 h-8 text-white" />
-            </div>
-            <CardTitle className="text-2xl">SwiftPath Admin</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <Label htmlFor="password">Admin Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter admin password"
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-                Login to Admin Panel
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted">
@@ -473,6 +503,58 @@ const AdminPage = () => {
                           />
                         </div>
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Media Upload Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Media Upload (Optional)</h3>
+                    <div className="border-2 border-dashed border-muted-foreground/30 rounded-lg p-6">
+                      {!mediaPreview ? (
+                        <div className="text-center">
+                          <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                          <div className="space-y-2">
+                            <p className="text-sm font-medium">Upload an image or video</p>
+                            <p className="text-xs text-muted-foreground">
+                              Supported formats: JPEG, PNG, GIF, MP4, WebM, OGG (Max 50MB)
+                            </p>
+                            <Input
+                              type="file"
+                              accept="image/jpeg,image/png,image/gif,video/mp4,video/webm,video/ogg"
+                              onChange={handleMediaUpload}
+                              className="mt-2"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-medium">Media Preview</p>
+                            <Button variant="outline" size="sm" onClick={removeMedia}>
+                              <X className="w-4 h-4 mr-1" />
+                              Remove
+                            </Button>
+                          </div>
+                          <div className="flex justify-center">
+                            {mediaFile?.type.startsWith('image/') ? (
+                              <img
+                                src={mediaPreview}
+                                alt="Media preview"
+                                className="max-h-48 max-w-full rounded-lg object-contain"
+                              />
+                            ) : (
+                              <video
+                                src={mediaPreview}
+                                controls
+                                className="max-h-48 max-w-full rounded-lg"
+                              />
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground text-center">
+                            File: {mediaFile?.name} ({(mediaFile?.size || 0 / 1024 / 1024).toFixed(2)} MB)
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
 

@@ -71,6 +71,8 @@ export type Database = {
           last_scan_at: string | null
           lat: number | null
           lng: number | null
+          media_type: string | null
+          media_url: string | null
           origin: string
           package_description: string
           package_value: number
@@ -99,6 +101,8 @@ export type Database = {
           last_scan_at?: string | null
           lat?: number | null
           lng?: number | null
+          media_type?: string | null
+          media_url?: string | null
           origin: string
           package_description: string
           package_value: number
@@ -127,6 +131,8 @@ export type Database = {
           last_scan_at?: string | null
           lat?: number | null
           lng?: number | null
+          media_type?: string | null
+          media_url?: string | null
           origin?: string
           package_description?: string
           package_value?: number

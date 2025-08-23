@@ -28,6 +28,8 @@ interface Shipment {
   lat: number | null;
   lng: number | null;
   created_at: string;
+  media_url: string | null;
+  media_type: string | null;
 }
 
 interface ShipmentEvent {
@@ -432,6 +434,34 @@ const TrackingPage = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* Package Media */}
+          {shipment.media_url && (
+            <Card className="shadow-xl">
+              <CardHeader>
+                <CardTitle>Package Media</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex justify-center">
+                  {shipment.media_type === 'image' ? (
+                    <img
+                      src={shipment.media_url}
+                      alt="Package media"
+                      className="max-h-96 max-w-full rounded-lg object-contain shadow-lg"
+                    />
+                  ) : shipment.media_type === 'video' ? (
+                    <video
+                      src={shipment.media_url}
+                      controls
+                      className="max-h-96 max-w-full rounded-lg shadow-lg"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : null}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Customs Held Alert */}
           {shipment.is_customs_held && (
