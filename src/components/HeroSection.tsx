@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Play } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
 interface HeroSectionProps {
   title: string;
   subtitle: string;
@@ -11,7 +10,6 @@ interface HeroSectionProps {
   ctaSecondary?: string;
   badges?: string[];
 }
-
 const HeroSection = ({
   title,
   subtitle,
@@ -22,14 +20,11 @@ const HeroSection = ({
   badges = []
 }: HeroSectionProps) => {
   const navigate = useNavigate();
-
-  return (
-    <section className="hero-section">
+  return <section className="hero-section">
       {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${backgroundImage})` }}
-      />
+      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{
+      backgroundImage: `url(${backgroundImage})`
+    }} />
       
       {/* Overlay */}
       <div className="hero-overlay" />
@@ -50,38 +45,21 @@ const HeroSection = ({
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-          <Button 
-            size="lg" 
-            className="btn-hero text-lg px-8 py-4"
-            onClick={() => navigate('/#tracking')}
-          >
-            {ctaPrimary}
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="btn-hero-outline text-lg px-8 py-4"
-          >
+          
+          <Button variant="outline" size="lg" className="btn-hero-outline text-lg px-8 py-4 text-justify">
             <Play className="mr-2 w-5 h-5" />
             {ctaSecondary}
           </Button>
         </div>
 
         {/* Trust Badges */}
-        {badges.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-6 text-white/70">
-            {badges.map((badge, index) => (
-              <div key={index} className="flex items-center space-x-2">
+        {badges.length > 0 && <div className="flex flex-wrap justify-center gap-6 text-white/70">
+            {badges.map((badge, index) => <div key={index} className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-accent rounded-full" />
                 <span className="text-sm font-medium">{badge}</span>
-              </div>
-            ))}
-          </div>
-        )}
+              </div>)}
+          </div>}
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default HeroSection;
