@@ -31,9 +31,23 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
-            
+            <a href="#services" className="text-foreground hover:text-primary transition-colors">Services</a>
             <a href="#tracking" className="text-foreground hover:text-primary transition-colors">Track</a>
             <a href="#about" className="text-foreground hover:text-primary transition-colors">About</a>
+            <button 
+              onClick={() => {
+                // Trigger JivoChat widget
+                if ((window as any).jivo_api) {
+                  (window as any).jivo_api.open();
+                } else {
+                  // Fallback - scroll to footer or show message
+                  toast.error('Chat support will be available shortly');
+                }
+              }}
+              className="text-foreground hover:text-primary transition-colors"
+            >
+              Customer Support
+            </button>
           </nav>
 
           {/* Desktop Tracking */}
@@ -66,6 +80,19 @@ const Header = () => {
                 <a href="#services" className="text-foreground hover:text-primary py-2">Services</a>
                 <a href="#tracking" className="text-foreground hover:text-primary py-2">Track Shipment</a>
                 <a href="#about" className="text-foreground hover:text-primary py-2">About Us</a>
+                <button 
+                  onClick={() => {
+                    if ((window as any).jivo_api) {
+                      (window as any).jivo_api.open();
+                    } else {
+                      toast.error('Chat support will be available shortly');
+                    }
+                    setIsMenuOpen(false);
+                  }}
+                  className="text-foreground hover:text-primary py-2 text-left"
+                >
+                  Customer Support
+                </button>
               </nav>
             </div>
           </div>}

@@ -2,6 +2,8 @@ import Header from '@/components/Header';
 import HeroSection from '@/components/HeroSection';
 import TrackingPanel from '@/components/TrackingPanel';
 import AboutSection from '@/components/AboutSection';
+import ServicesSection from '@/components/ServicesSection';
+import TrackShipmentCTA from '@/components/TrackShipmentCTA';
 
 // Import hero images
 import heroAirFreight from '@/assets/hero-air-freight.jpg';
@@ -66,17 +68,23 @@ const HomePage = () => {
       <main>
         {/* Hero Sections */}
         {heroSections.map((section, index) => (
-          <HeroSection
-            key={index}
-            title={section.title}
-            subtitle={section.subtitle}
-            description={section.description}
-            backgroundImage={section.backgroundImage}
-            ctaPrimary={section.ctaPrimary}
-            ctaSecondary={section.ctaSecondary}
-            badges={section.badges}
-          />
+          <div key={index}>
+            <HeroSection
+              title={section.title}
+              subtitle={section.subtitle}
+              description={section.description}
+              backgroundImage={section.backgroundImage}
+              ctaPrimary={section.ctaPrimary}
+              ctaSecondary={section.ctaSecondary}
+              badges={section.badges}
+            />
+            {/* Add Track Shipment CTA after first hero section (Global Air Freight) */}
+            {index === 0 && <TrackShipmentCTA />}
+          </div>
         ))}
+
+        {/* Services Section */}
+        <ServicesSection />
 
         {/* Tracking Panel */}
         <TrackingPanel />
