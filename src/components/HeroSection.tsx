@@ -46,7 +46,20 @@ const HeroSection = ({
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
           
-          <Button variant="outline" size="lg" className="btn-hero-outline text-lg px-8 py-4 text-justify">
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="btn-hero-outline text-lg px-8 py-4 text-justify"
+            onClick={() => {
+              // Trigger JivoChat widget for quote requests
+              if ((window as any).jivo_api) {
+                (window as any).jivo_api.open();
+              } else {
+                // Fallback message
+                alert('Chat support will be available shortly. Please contact us at support@swiftpathdelivery.site');
+              }
+            }}
+          >
             <Play className="mr-2 w-5 h-5" />
             {ctaSecondary}
           </Button>

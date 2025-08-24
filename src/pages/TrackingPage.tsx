@@ -471,7 +471,13 @@ const TrackingPage = () => {
                   <AlertTriangle className="w-5 h-5 mr-2 text-destructive" />
                   <span className="font-bold text-destructive">Customs Hold Notice</span>
                 </div>
-                <p>Your goods have been held by customs. Please message customer service for assistance. Thank you.</p>
+                <p>This package has been held by customs. Kindly message the customer service or reach us at support@swiftpathdelivery.site to remove the ban on your package by customs.</p>
+                <div className="mt-3 p-3 bg-muted/50 rounded border-l-4 border-primary">
+                  <p className="text-sm text-muted-foreground">
+                    <strong>24/7 Expert Support:</strong> Our dedicated customs clearance specialists are available around the clock. 
+                    Contact us at support@swiftpathdelivery.site and we'll respond within 1 hour to resolve your customs issue quickly and efficiently.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           )}

@@ -119,6 +119,13 @@ const HomePage = () => {
                 <li>Customer Service</li>
                 <li>Shipping Calculator</li>
                 <li>FAQ</li>
+                <li className="pt-2">
+                  <strong className="text-white">Email Support:</strong><br/>
+                  <a href="mailto:support@swiftpathdelivery.site" className="text-accent hover:text-white transition-colors">
+                    support@swiftpathdelivery.site
+                  </a>
+                  <div className="text-xs mt-1 text-white/60">Response within 1 hour</div>
+                </li>
               </ul>
             </div>
             <div>
