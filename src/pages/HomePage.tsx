@@ -20,7 +20,6 @@ const HomePage = () => {
       description: "Express air cargo services connecting major cities worldwide with guaranteed delivery windows and real-time tracking.",
       backgroundImage: heroAirFreight,
       ctaPrimary: "Track Airfreight",
-      ctaSecondary: "Get Air Quote",
       badges: ["99.2% On-Time", "2-Day Express", "Live GPS Tracking"]
     },
     {
@@ -28,8 +27,7 @@ const HomePage = () => {
       subtitle: "At Scale",
       description: "Cost-effective sea freight solutions for large volume shipments with comprehensive container tracking and port-to-port visibility.",
       backgroundImage: heroSeaCargo,
-      ctaPrimary: "Track Ocean Cargo", 
-      ctaSecondary: "Container Rates",
+      ctaPrimary: "Track Ocean Cargo",
       badges: ["FCL & LCL Options", "Port Tracking", "Customs Included"]
     },
     {
@@ -38,7 +36,6 @@ const HomePage = () => {
       description: "State-of-the-art fulfillment centers with automated sorting, inventory management, and distribution capabilities worldwide.",
       backgroundImage: heroWarehouse,
       ctaPrimary: "Track Shipment",
-      ctaSecondary: "Warehouse Tour",
       badges: ["50K+ Daily Packages", "24/7 Operations", "Climate Controlled"]
     },
     {
