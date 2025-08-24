@@ -156,7 +156,38 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_shipment_by_tracking_id: {
+        Args: { tracking_code: string }
+        Returns: {
+          created_at: string
+          current_status: string
+          destination: string
+          eta: string
+          id: string
+          lat: number
+          lng: number
+          media_type: string
+          media_url: string
+          origin: string
+          package_description: string
+          receiver_name: string
+          sender_name: string
+          tracking_id: string
+          updated_at: string
+        }[]
+      }
+      get_shipment_events_by_tracking_id: {
+        Args: { tracking_code: string }
+        Returns: {
+          id: string
+          lat: number
+          lng: number
+          location: string
+          note: string
+          occurred_at: string
+          status: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
