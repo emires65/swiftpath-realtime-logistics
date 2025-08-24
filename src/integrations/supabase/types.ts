@@ -156,6 +156,37 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_public_shipment_by_tracking_id: {
+        Args: { tracking_code: string }
+        Returns: {
+          created_at: string
+          current_status: string
+          destination: string
+          eta: string
+          id: string
+          is_customs_held: boolean
+          lat: number
+          lng: number
+          media_type: string
+          media_url: string
+          origin: string
+          package_description: string
+          tracking_id: string
+          updated_at: string
+        }[]
+      }
+      get_public_shipment_events_by_tracking_id: {
+        Args: { tracking_code: string }
+        Returns: {
+          id: string
+          lat: number
+          lng: number
+          location: string
+          note: string
+          occurred_at: string
+          status: string
+        }[]
+      }
       get_shipment_by_tracking_id: {
         Args: { tracking_code: string }
         Returns: {
