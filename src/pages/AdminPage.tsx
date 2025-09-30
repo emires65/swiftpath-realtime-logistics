@@ -605,6 +605,25 @@ const AdminPage = () => {
                         </div>
                       </div>
 
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm bg-muted/30 p-3 rounded-lg">
+                        <div>
+                          <p className="text-muted-foreground text-xs">Package Value</p>
+                          <p className="font-semibold">{shipment.currency} {shipment.package_value?.toFixed(2) || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-xs">Shipping Fee</p>
+                          <p className="font-semibold">{shipment.currency} {shipment.shipping_fee?.toFixed(2) || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-xs">Delivery Days</p>
+                          <p className="font-semibold">{shipment.days_of_package || 'N/A'} days</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-xs">Weight</p>
+                          <p className="font-semibold">{shipment.weight?.toFixed(1) || 'N/A'} kg</p>
+                        </div>
+                      </div>
+
                       <div className="flex flex-wrap gap-2">
                         <Button 
                           variant="outline" 
