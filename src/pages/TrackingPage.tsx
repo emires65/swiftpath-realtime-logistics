@@ -30,6 +30,9 @@ interface Shipment {
   created_at: string;
   media_url: string | null;
   media_type: string | null;
+  weight: number | null;
+  shipping_fee: number | null;
+  days_of_package: number | null;
 }
 
 interface ShipmentEvent {
@@ -373,21 +376,21 @@ const TrackingPage = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-muted-foreground text-sm">Weight</span>
-                    <p className="font-medium">3 kg</p>
+                    <p className="font-medium">{shipment.weight ? `${shipment.weight} kg` : 'N/A'}</p>
                   </div>
                   <div>
-                    <span className="text-muted-foreground text-sm">Service Type</span>
-                    <p className="font-medium">📦 Express</p>
+                    <span className="text-muted-foreground text-sm">Package Value</span>
+                    <p className="font-medium">{shipment.currency} {shipment.package_value?.toFixed(2)}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-muted-foreground text-sm">Shipping Fee</span>
-                    <p className="font-medium">{shipment.currency} {shipment.package_value}</p>
+                    <p className="font-medium">{shipment.currency} {shipment.shipping_fee?.toFixed(2) || 'N/A'}</p>
                   </div>
                   <div>
                     <span className="text-muted-foreground text-sm">Delivery Time</span>
-                    <p className="font-medium">3-5 days</p>
+                    <p className="font-medium">{shipment.days_of_package ? `${shipment.days_of_package} days` : 'N/A'}</p>
                   </div>
                 </div>
                 <div>
