@@ -20,7 +20,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/track/:trackingId" element={<TrackingPage />} />
-          <Route path="/admin-login" element={<AdminLoginPage />} />
+          <Route path="/admin/auth" element={<AdminLoginPage />} />
           <Route path="/admin" element={<AdminPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
